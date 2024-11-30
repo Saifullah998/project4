@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drag-and-Drop Game</title>
+    <style>
+        .container {
+            max-width: 40%;
+            text-align: center;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding-left: 250px;
+            gap: 20px;
+            justify-content: center;
+        }
+        .item {
+            background-color: #CCCCFF;
+            width: 100px;
+            height: 70px;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dragging {
+            opacity: 0.5;
+        }
+        .dragover {
+            background-color: #A9A9F5;
+        }
+        .timer {
+            font-size: 20px;
+            margin: 20px;
+          
+        }
+    </style>
+</head>
+<body>
+    <!-- Game Grid -->
+    <div class="container">
+        <div class="item" id="div1" draggable="true">1</div>
+        <div class="item" id="div2" draggable="true">2</div>
+        <div class="item" id="div3" draggable="true">3</div>
+        <div class="item" id="div4" draggable="true">4</div>
+        <div class="item" id="div5" draggable="true">5</div>
+        <div class="item" id="div6" draggable="true">6</div>
+        <div class="item" id="div7" draggable="true">7</div>
+        <div class="item" id="div8" draggable="true">8</div>
+        <div class="item" id="div9" draggable="true">9</div>
+    </div>
+
+    
+    <button onclick="startGame()">Start Game</button>
+
+   
+    <div class="timer">Time left: <span id="timer">15</span> seconds</div>
+
+    <script>
+        let timerInterval;
+        let timeLeft = 15; 
+
+        
+        function generateRandomNum() {
+            let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            numbers = shuffleArray(numbers);
+
+            for (let i = 0; i < numbers.length; i++) {
+                const element = document.getElementById(`div${i + 1}`);
+                if (element) {
+                    element.innerHTML = numbers[i];
+                }
+            }
+        }
+
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        
+        let dragged;
+        for (let i = 1; i <= 9; i++) {
+            const source = document.getElementById(`div${i}`);
+            if (source) {
+                source.addEventListener("dragstart", (event) => {
+                    dragged = event.target;
+                    event.target.classList.add("dragging");
+                });
+
+                source.addEventListener("dragend", (event) => {
+                    event.target.classList.remove("dragging");
+                });
+
+                source.addEventListener("dragover", (event) => {
+                    event.preventDefault();
+                });
+
+                source.addEventListener("dragenter", (event) => {
+                    if (event.target.classList.contains("item")) {
+                        event.target.classList.add("dragover");
+                    }
+                });
+
+                source.addEventListener("dragleave", (event) => {
+                    if (event.target.classList.contains("item")) {
+                        event.target.classList.remove("dragover");
+                    }
+                });
+
+                source.addEventListener("drop", (event) => {
+                    event.preventDefault();
+                    if (event.target.classList.contains("item")) {
+                        event.target.classList.remove("dragover");
+                        
+                        const temp = event.target.innerHTML;
+                        event.target.innerHTML = dragged.innerHTML;
+                        dragged.innerHTML = temp;
+                    }
+                });
+            }
+        }
+
+        function checkOrder() {
+            let currentNumbers = [];
+            for (let i = 1; i <= 9; i++) {
+                const elem = document.getElementById(`div${i}`);
+                if (elem) {
+                    currentNumbers.push(parseInt(elem.innerHTML, 10));
+                }
+            }
+
+           
+            const sortedOrder = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+            if (JSON.stringify(currentNumbers) === JSON.stringify(sortedOrder)) {
+                alert("You won!");
+            } else {
+                alert("You lose!");
+            }
+        }
+
+        
+        function startTimer() {
+            const timerDisplay = document.getElementById("timer");
+            timeLeft = 15;
+            timerDisplay.textContent = timeLeft;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    checkOrder(); 
+                }
+            }, 1000);
+        }
+
+        
+        function startGame() {
+            clearInterval(timerInterval); 
+            generateRandomNum();
+            startTimer(); 
+        }
+    </script>
+</body>
+</html>
